@@ -1,19 +1,14 @@
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import ExtraTreesClassifier
-
 import streamlit as st
-import pickle
 
 @st.cache_resource
 def create_and_train_model():
-    # Đọc dữ liệu từ đường dẫn (cập nhật đường dẫn phù hợp)
-    df = pd.read_csv('/workspaces/creditworthiness/final project.csv')
+    df = pd.read_csv('https://raw.githubusercontent.com/ThaiDanhNgo/creditworthiness/refs/heads/main/final%20project.csv')
     
     # Tiền xử lý dữ liệu
     df['issue_d'] = pd.to_datetime(df['issue_d'], format='%b-%Y')
@@ -25,13 +20,11 @@ def create_and_train_model():
     # Loại bỏ ngoại lai theo IQR của boxplot
     df = df[df['loan_amnt'] <= 38000]
     df = df[df['int_rate'] <= 25.83]
-    df = df[df['year_diff'] <= 31]
     df = df[df['annual_inc'] <= 154500]
     df = df[df['dti'] <= 41.05]
     df = df[df['revol_bal'] <= 40600]
     df = df[df['revol_util'] <= 124.7]
     df = df[df['total_acc'] <= 57]
-    df = df[df['payback_time'] <= 6.3086]
     df = df[df['mort_ratio'] <= 0.6667]
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(axis=1)]
     
@@ -69,12 +62,12 @@ def create_and_train_model():
     et = ExtraTreesClassifier()
     et.fit(X_train, Y_train)
     
-    return et, encoders
+    return et, encoders, scaler
 
 # Giao diện người dùng với Streamlit
 def main():
     # Tạo và huấn luyện mô hình
-    model, encoders, scaler, classification_rep = create_and_train_model()
+    model, encoders, scaler = create_and_train_model()
     
     # Tiêu đề và CSS
     st.markdown("""
@@ -91,33 +84,6 @@ def main():
         © Copyright: Creditworthiness Project - authorized by Ngo Danh Thai
         </div>
         """, unsafe_allow_html=True)
-    
-    # CSS cho các thành phần
-    st.markdown("""
-        <style>
-        .main {
-            background-color: #F0F2F6;
-        }
-        h1 {
-            color: #45b5b1;
-        }
-        .stButton > button {
-            background-color: #45b5b1;
-            color: white;
-            border-radius: 5px;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-        .stButton > button:hover {
-            background-color: #45a049;
-        }
-        .prediction {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        </style>
-    """, unsafe_allow_html=True)
     
     st.title('Loan Status Prediction')
     
@@ -204,10 +170,6 @@ def main():
             st.success(f'Predicted Loan Status: {prob_fully_paid:.2f}% Fully Paid')
         else:
             st.error(f'Predicted Loan Status: {prob_charged_off:.2f}% Charged Off')
-        
-        # Hiển thị các chỉ số hiệu suất (tùy chọn)
-        st.subheader('Model Performance on Test Set')
-        st.text(classification_rep)
 
 if __name__ == "__main__":
     main()
