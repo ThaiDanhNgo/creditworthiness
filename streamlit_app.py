@@ -94,7 +94,7 @@ def main():
         loan_amnt_value = st.number_input('Loan Amount', min_value=1000)
         verification_status_value = st.selectbox('Verification Status', ['Verified', 'Source Verified', 'Not Verified'])
     with col2:
-        term_value = st.selectbox('Term', ['36 months', '60 months'])
+        term_value = st.selectbox('Term', [' 36 months', ' 60 months'])
         purpose_value = st.selectbox('Purpose', [
             'debt_consolidation', 'credit_card', 'home_improvement', 'other',
             'major_purchase', 'small_business', 'car', 'medical', 'moving',
